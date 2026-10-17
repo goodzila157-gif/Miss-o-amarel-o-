@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Missão Amarelão — Aventura</title>
+<style>
+:root{--ink:#17324d;--mint:#dff7e8;--gold:#ffd166;--coral:#ff8066;--blue:#bde0fe}*{box-sizing:border-box}body{margin:0;background:linear-gradient(#e9f7ff,#f5fff4);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}main{max-width:900px;margin:auto;padding:14px}.hero,.hud,.story,.finish{background:#fff;border:2px solid #d7e8ed;border-radius:20px;padding:16px;box-shadow:0 5px 0 #d7e8ed;margin-bottom:12px}.hero{text-align:center}.hero h1{margin:4px 0;font-size:clamp(27px,6vw,42px)}.hero p{margin:8px 0 14px}.tag{display:inline-block;border-radius:99px;padding:5px 10px;background:#e3f7e8;font-weight:800;font-size:12px}.btn{border:0;background:#176b56;color:white;font-weight:800;font-size:16px;padding:13px 18px;border-radius:14px;cursor:pointer;box-shadow:0 4px 0 #0b4b3b}.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #0b4b3b}.hidden{display:none!important}.hud{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.hud strong{font-size:15px}.barwrap{height:9px;background:#e5eff2;border-radius:99px;overflow:hidden;flex:1;min-width:90px}.bar{height:100%;width:0;background:#26a269;transition:width .2s}canvas{display:block;width:100%;height:auto;border-radius:18px;border:3px solid #fff;box-shadow:0 6px 0 #d7e8ed;background:#c9f1ff;touch-action:pan-y}.story{display:flex;gap:12px;align-items:center}.story .emoji{font-size:35px}.story p{margin:3px 0}.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0}.pad{display:flex;gap:8px}.ctrl{width:62px;height:56px;border:0;border-radius:16px;background:white;border:2px solid #c8dce2;box-shadow:0 4px 0 #c8dce2;font-size:25px;font-weight:900;color:#17324d;touch-action:none}.ctrl.jump{background:#ffe7a6}.hint{text-align:center;color:#527080;font-size:13px}.modal{background:#fff;border:2px solid #cde4d7;border-radius:18px;padding:16px;margin:12px 0}.options{display:grid;gap:8px}.options button{background:#f2f8fa;border:2px solid #d7e8ed;border-radius:12px;padding:11px;text-align:left;font-size:15px;color:var(--ink)}.options button:active{background:#dff7e8}.footer{text-align:center;font-size:12px;color:#64808d;padding:12px}
+</style></head><body><main>
+<section id="intro" class="hero"><div style="font-size:46px">🧑‍🚀🪱</div><span class="tag">JOGO DE PLATAFORMA EDUCATIVO</span><h1>MISSÃO AMARELÃO</h1><p>Controle a Nina e atravesse as etapas do ciclo do parasita! Corra, pule obstáculos e descubra como prevenir a doença.</p><p><b>Como jogar:</b> use as setas ou os botões na tela. Pule os obstáculos e chegue ao portal no fim de cada fase.</p><button class="btn" onclick="startGame()">Começar aventura ▶</button></section>
+<section id="play" class="hidden"><div class="hud"><strong id="stageLabel">FASE 1 — SOLO</strong><div class="barwrap"><div id="progress" class="bar"></div></div><strong id="score">⭐ 0</strong></div><canvas id="game" width="800" height="420" aria-label="Jogo de plataforma"></canvas><div class="controls"><div class="pad"><button class="ctrl" id="left" aria-label="Esquerda">◀</button><button class="ctrl" id="right" aria-label="Direita">▶</button></div><button class="ctrl jump" id="jump" aria-label="Pular">⬆ PULAR</button></div><p class="hint">No computador: ← → para andar e espaço/↑ para pular. No celular: use os botões.</p><div class="story"><div class="emoji" id="storyEmoji">🌱</div><div><b id="storyTitle">Solo contaminado</b><p id="storyText">Os ovos do parasita saem nas fezes e, em solo adequado, podem evoluir para larvas.</p></div></div><div id="quiz" class="modal hidden"><b id="quizTitle">Parada educativa</b><p id="quizQuestion"></p><div id="quizOptions" class="options"></div><p id="quizFeedback" aria-live="polite"></p><button id="continue" class="btn hidden" onclick="continueAfterQuiz()">Continuar ▶</button></div></section>
+<section id="finish" class="finish hidden" style="text-align:center"><div style="font-size:52px">🏆</div><h2>Missão concluída!</h2><p id="finishText"></p><p>Você percorreu o ciclo do parasita e aprendeu formas de prevenção: usar calçados, saneamento básico e destino adequado das fezes.</p><button class="btn" onclick="location.reload()">Jogar novamente ↻</button></section>
+<div class="footer">Material educativo para apresentação acadêmica. O jogo simplifica o ciclo da ancilostomíase.</div>
+</main><script>
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const levels=[
+ {label:'FASE 1 — SOLO',emoji:'🌱',title:'Solo contaminado',text:'Os ovos são eliminados nas fezes. No ambiente adequado, desenvolvem-se até formar larvas infectantes.',sky:'#bdeaff',ground:'#8acb72',question:'Como os ovos do parasita chegam ao solo?',answers:['Pela picada de um mosquito','Pelas fezes de uma pessoa infectada','Pelo suor'],correct:1,explain:'Isso mesmo! Os ovos são eliminados nas fezes.'},
+ {label:'FASE 2 — PELE',emoji:'🦶',title:'Entrada pela pele',text:'Larvas infectantes no solo podem penetrar pela pele, principalmente quando a pessoa anda descalça.',sky:'#d7f5ff',ground:'#d4a373',question:'Como as larvas infectantes geralmente entram no corpo?',answers:['Pelo cabelo','Pelo ouvido','Pela pele'],correct:2,explain:'Correto! Usar calçados ajuda a prevenir a infecção.'},
+ {label:'FASE 3 — PULMÕES',emoji:'🫁',title:'Migração pelo organismo',text:'Após penetrar pela pele, as larvas podem viajar pela circulação até os pulmões, subir pelas vias respiratórias e ser engolidas.',sky:'#d7edff',ground:'#9cb5d8',question:'Por qual órgão as larvas podem passar antes de serem engolidas?',answers:['Coração por dentro das câmaras','Pulmões','Cabelos'],correct:1,explain:'Isso! Elas podem passar pelos pulmões e subir pelas vias respiratórias.'},
+ {label:'FASE 4 — INTESTINO',emoji:'🩺',title:'Vermes adultos e prevenção',text:'Os vermes adultos vivem no intestino delgado e podem causar perda de sangue e anemia. Saneamento e calçados ajudam a interromper o ciclo.',sky:'#fff0d4',ground:'#b7c88b',question:'Qual medida ajuda a prevenir o amarelão?',answers:['Andar descalço','Compartilhar toalhas','Usar calçados e ter saneamento básico'],correct:2,explain:'Perfeito! Calçados e saneamento básico são medidas importantes.'}
+];
+let level=0,score=0,paused=false,done=false,keys={left:false,right:false},player,platforms,obstacles,portal,frame=0;
+function setupLevel(){player={x:35,y:300,w:34,h:48,vx:0,vy:0,onGround:false};let g=350;platforms=[{x:0,y:g,w:800,h:70},{x:145,y:292,w:100,h:14},{x:310,y:250,w:110,h:14},{x:480,y:294,w:100,h:14},{x:630,y:255,w:85,h:14}];obstacles=[{x:220,y:g-27,w:25,h:27},{x:390,y:g-35,w:30,h:35},{x:555,y:g-24,w:25,h:24}];portal={x:744,y:280,w:35,h:70};paused=false;done=false;document.getElementById('quiz').classList.add('hidden');document.getElementById('stageLabel').textContent=levels[level].label;document.getElementById('storyEmoji').textContent=levels[level].emoji;document.getElementById('storyTitle').textContent=levels[level].title;document.getElementById('storyText').textContent=levels[level].text;document.getElementById('progress').style.width=(level/levels.length*100)+'%';}
+function startGame(){document.getElementById('intro').classList.add('hidden');document.getElementById('play').classList.remove('hidden');level=0;score=0;document.getElementById('score').textContent='⭐ 0';setupLevel();requestAnimationFrame(loop)}
+function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h)}
+function draw(){let L=levels[level];let grad=ctx.createLinearGradient(0,0,0,420);grad.addColorStop(0,L.sky);grad.addColorStop(1,'#f7fff7');ctx.fillStyle=grad;ctx.fillRect(0,0,800,420);
+// clouds
+ctx.fillStyle='rgba(255,255,255,.8)';[[90,65],[320,92],[600,55]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.arc(x+22,y-8,28,0,Math.PI*2);ctx.arc(x+48,y,20,0,Math.PI*2);ctx.fill()});
+// background scene
+ctx.font='28px sans-serif';ctx.fillText(L.emoji,30,145);ctx.fillText(level===0?'🥚 🪱':level===1?'🦶 🪱':level===2?'🫁 🩸':'🩺 🦠',560,125);
+platforms.forEach((p,i)=>{rect(p.x,p.y,p.w,p.h,L.ground);rect(p.x,p.y,p.w,5,'rgba(255,255,255,.5)');if(i===0){for(let x=0;x<800;x+=38){ctx.font='18px sans-serif';ctx.fillText(level===0?'🌿':level===1?'🪨':level===2?'☁️':'🌾',x,p.y+33)}}});
+obstacles.forEach(o=>{ctx.font='25px sans-serif';ctx.fillText(level===0?'🦠':level===1?'🪨':level===2?'💨':'🩸',o.x-3,o.y+23)});
+// portal
+ctx.fillStyle='#8b5cf6';ctx.beginPath();ctx.ellipse(portal.x+17,portal.y+34,18,34,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d8b4fe';ctx.beginPath();ctx.ellipse(portal.x+17,portal.y+34,10,26,0,0,Math.PI*2);ctx.fill();ctx.font='22px sans-serif';ctx.fillText('➡',portal.x+3,portal.y-8);
+// Nina character
+ctx.fillStyle='#f6c7a5';ctx.beginPath();ctx.arc(player.x+17,player.y+10,11,0,Math.PI*2);ctx.fill();ctx.fillStyle='#3a2b28';ctx.beginPath();ctx.arc(player.x+17,player.y+6,11,Math.PI,Math.PI*2);ctx.fill();rect(player.x+5,player.y+21,24,20,'#ef6c4d');rect(player.x+5,player.y+40,9,8,'#344e7a');rect(player.x+20,player.y+40,9,8,'#344e7a');rect(player.x+1,player.y+24,5,15,'#f6c7a5');rect(player.x+28,player.y+24,5,15,'#f6c7a5');ctx.fillStyle='#17324d';ctx.fillRect(player.x+13,player.y+9,3,3);ctx.fillRect(player.x+20,player.y+9,3,3);
+}
+function collide(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function loop(){if(document.getElementById('play').classList.contains('hidden'))return;frame++;if(!paused&&!done){player.vx=(keys.right?3.3:0)-(keys.left?3.3:0);player.x+=player.vx;player.vy+=.52;player.y+=player.vy;player.onGround=false;for(const p of platforms){if(player.vy>=0&&player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+Math.max(18,player.vy+3)){player.y=p.y-player.h;player.vy=0;player.onGround=true}}if(player.x<0)player.x=0;if(player.x+player.w>800)player.x=800-player.w;
+for(const o of obstacles){if(collide(player,o)){player.x=35;player.y=300;player.vy=0;score=Math.max(0,score-1);document.getElementById('score').textContent='⭐ '+score;break}}
+if(collide(player,portal)){paused=true;showQuiz()}}
+draw();requestAnimationFrame(loop)}
+function jump(){if(!paused&&player&&player.onGround){player.vy=-10.7;player.onGround=false}}
+function showQuiz(){
+  const L=levels[level];
+  const quiz=document.getElementById('quiz');
+  quiz.classList.remove('hidden');
+  document.getElementById('quizTitle').textContent='Etapa concluída: '+L.title;
+  document.getElementById('quizQuestion').textContent=L.question;
+  const feedback=document.getElementById('quizFeedback');
+  feedback.textContent='';
+  const next=document.getElementById('continue');
+  next.classList.add('hidden');
+  const box=document.getElementById('quizOptions');
+  box.innerHTML='';
+  delete box.dataset.answered;
+  // Embaralha as alternativas a cada tentativa e mantém a resposta correta associada ao texto.
+  const choices=L.answers.map((answer,index)=>({answer,correct:index===L.correct}));
+  for(let i=choices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[choices[i],choices[j]]=[choices[j],choices[i]];}
+  choices.forEach((choice,i)=>{
+    const b=document.createElement('button');
+    b.textContent=['A. ','B. ','C. '][i]+choice.answer;
+    b.onclick=()=>{
+      if(box.dataset.answered==='correct') return;
+      if(choice.correct){
+        box.dataset.answered='correct';
+        score+=10;
+        feedback.textContent='✅ Resposta correta! '+L.explain;
+        feedback.style.color='#167447';
+        b.style.background='#dff7e8';
+        b.style.borderColor='#26a269';
+        [...box.children].forEach(btn=>btn.disabled=true);
+        document.getElementById('score').textContent='⭐ '+score;
+        next.classList.remove('hidden');
+      } else {
+        feedback.textContent='❌ Resposta incorreta. Tente novamente! Você precisa acertar para avançar.';
+        feedback.style.color='#b42318';
+        b.disabled=true;
+        b.style.background='#ffe2e2';
+        b.style.borderColor='#d62828';
+      }
+    };
+    box.appendChild(b);
+  });
+}
+function continueAfterQuiz(){level++;if(level>=levels.length){document.getElementById('play').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('finishText').textContent='Pontuação final: '+score+' pontos. Você controlou a Nina pelas quatro etapas da missão!';document.getElementById('progress').style.width='100%';return}setupLevel()}
+document.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp',' '].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')keys.left=true;if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')keys.right=true;if(e.key==='ArrowUp'||e.key===' ')jump()});document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')keys.left=false;if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')keys.right=false});function bindHold(id,key){let el=document.getElementById(id);el.addEventListener('pointerdown',e=>{e.preventDefault();keys[key]=true;el.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>el.addEventListener(ev,e=>{keys[key]=false}))}bindHold('left','left');bindHold('right','right');document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});
+</script></body></html>
